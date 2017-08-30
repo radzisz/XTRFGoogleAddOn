@@ -1,0 +1,34 @@
+<? var lastInput = getLastInput(); ?>
+<!-- Use a templated HTML printing scriptlet to import common stylesheet. -->
+<?!= HtmlService.createHtmlOutputFromFile('Stylesheet').getContent(); ?>
+
+<!-- Below is the HTML code that defines the sidebar element structure. -->
+<div class="sidebar branding-below">
+  <p>
+  To import data from XTRF View page into a spreadsheet, simply paste its link and provide your access token.
+  </p>
+  
+  <div class="block form-group">
+    <label for="sidebar-view-address">Paste link:</label>
+    <input class="width-100" id="sidebar-view-address" value="<?= lastInput.viewAddress ?>">
+    <label for="sidebar-access-token">Access token:</label>
+    <input class="width-100" id="sidebar-access-token" value="<?= lastInput.accessToken ?>">
+  </div>
+  
+  <div class="block">
+    <button class="action width-100" id="sidebar-import-button" >Import</button>
+  </div>
+  
+  <div id="sidebar-status"></div>
+  <div id="progress-indicator" style="display: none">
+    <div>
+    <div class="loader">Loading ...</div>
+    </div>
+    <div class="message"></div>
+  </div>
+</div>
+  
+<div class="sidebar bottom xtrf-logo"></div>
+
+<!-- Use a templated HTML printing scriptlet to import JavaScript. -->
+<?!= HtmlService.createHtmlOutputFromFile('SidebarJavaScript').getContent(); ?>

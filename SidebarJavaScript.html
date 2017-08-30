@@ -1,0 +1,79 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+  $(function() {
+    var viewAddressInput   = $('#sidebar-view-address');
+    var accessTokenInput   = $('#sidebar-access-token');
+    var importButton       = $('#sidebar-import-button');
+    var statusPanel        = $('#sidebar-status');
+    
+    var progressIndicator = new (function() {
+      var slf = this;
+      var progressIndicator  = $('#progress-indicator');
+      var progresIndicatorMessage = $('#progress-indicator .message');
+      var currentText = -1;
+      var progressIndicatingMessages = [
+        "This may take a while",
+        "Importing data from XTRF",
+        "Just a few seconds left"
+      ];
+      var changeMessageIntervalId;
+
+      slf.show = function() {
+        changeMessageIntervalId = setInterval(nextMessage, 3000);
+        progressIndicator.show();
+      };
+      
+      slf.hide = function() {
+         progressIndicator.hide();
+         clearInterval(changeMessageIntervalId);
+      };
+      
+      function nextMessage() {
+        currentText = (currentText + 1) % 3;
+        progresIndicatorMessage.text(progressIndicatingMessages[currentText]);
+      }
+
+      nextMessage();
+      return slf;
+    })();
+
+    function changeRefreshButtonState() {
+      var shouldImportButtonBeEnabled = viewAddressInput.val().length > 0 && accessTokenInput.val().length > 0;
+      importButton.prop("disabled", !shouldImportButtonBeEnabled);
+    }
+
+    viewAddressInput.keyup(changeRefreshButtonState);
+    accessTokenInput.keyup(changeRefreshButtonState);
+
+    importButton.click(function() {
+      this.disabled = true;
+      
+      progressIndicator.show();
+
+      var viewAddress = viewAddressInput.val();
+      var accessToken = accessTokenInput.val();
+      
+      google.script.run
+        .withSuccessHandler(
+          function(msg, element) {
+            element.disabled = false;
+            progressIndicator.hide();
+            showStatus('Data has been successfully imported', 'success');
+          })
+        .withFailureHandler(
+          function(err, element) {
+            element.disabled = false;
+            progressIndicator.hide();
+            showStatus(err, 'error');
+          })
+        .withUserObject(this)
+        .importXtrfViewIntoActiveCell(viewAddress, accessToken);
+    });
+
+    function showStatus(msg, classId) {
+      statusPanel.removeClass().html(msg);
+      if (classId) 
+        statusPanel.addClass(classId);
+    }
+  });
+</script>
